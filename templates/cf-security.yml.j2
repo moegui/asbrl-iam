@@ -32,9 +32,12 @@ Resources:
 {% endfor %}
       ManagedPolicyArns: {{ROLES[z].MANAGEMENT_POLICIES | to_yaml}}
       Tags: 
-        ClusterName: !Ref ClusterName
-        Release: {{TAGS.RELEASE}}
-        Environment: {{TAGS.ENVIRONMENT_TYPE}}
+        - Key: ClusterName  
+          Value: !Ref ClusterName
+        - Key: Release
+          Value: {{TAGS.RELEASE}}
+        - Key: Environment
+          Value: {{TAGS.ENVIRONMENT_TYPE}}
 
 {% endfor %}
 
@@ -46,9 +49,12 @@ Resources:
       Roles:
         - Ref: Role{{INSTANCE_PROFILES[z].ROLENAME}}
       Tags: 
-          ClusterName: !Ref ClusterName
-          Release: {{TAGS.RELEASE}}
-          Environment: {{TAGS.ENVIRONMENT_TYPE}}
+        - Key: ClusterName  
+          Value: !Ref ClusterName
+        - Key: Release
+          Value: {{TAGS.RELEASE}}
+        - Key: Environment
+          Value: {{TAGS.ENVIRONMENT_TYPE}}
 
 {% endfor %}
 
@@ -70,9 +76,12 @@ Resources:
 {% endfor %}
 {% endif %}
       Tags: 
-          ClusterName: !Ref ClusterName
-          Release: {{TAGS.RELEASE}}
-          Environment: {{TAGS.ENVIRONMENT_TYPE}}
+        - Key: ClusterName  
+          Value: !Ref ClusterName
+        - Key: Release
+          Value: {{TAGS.RELEASE}}
+        - Key: Environment
+          Value: {{TAGS.ENVIRONMENT_TYPE}}
           
 {% endfor %}
 
