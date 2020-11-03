@@ -48,13 +48,6 @@ Resources:
       InstanceProfileName: !Sub ${Prefix}-${ClusterName}-instanceprofile-{{INSTANCE_PROFILES[z].NAME|lower}}
       Roles:
         - Ref: Role{{INSTANCE_PROFILES[z].ROLENAME}}
-      Tags: 
-        - Key: ClusterName  
-          Value: !Ref ClusterName
-        - Key: Release
-          Value: {{TAGS.RELEASE}}
-        - Key: Environment
-          Value: {{TAGS.ENVIRONMENT_TYPE}}
 
 {% endfor %}
 
