@@ -1,2 +1,6 @@
 ---
-# tasks file for asbrl-iam
+- name: Generate CF Security
+  template:
+    src: "cf-security.yml.j2"
+    dest: "{{ TEMPLATE_DEST }}"
+    mode: 0644

@@ -1,0 +1,88 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+
+  Prefix:
+    Type: String
+  ClusterName:
+    Type: String
+  VPC:
+    Type: String
+ 
+Resources:
+
+{% for z in range(0,ROLES|length) %}
+  Role{{ROLES[z].NAME}}:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: !Sub ${Prefix}-${ClusterName}-role-{{ROLES[z].NAME|lower}}
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+            - Effect: "Allow"
+              Principal:
+                Service:
+                  - "{{ROLES[z].ASSUME_ROLE_PRINCIPAL}}"
+              Action:
+                - "sts:AssumeRole"
+      Policies:
+{% for y in range(0,ROLES[z].POLICIES|length) %}
+      - PolicyName: !Sub "${Prefix}-${ClusterName}-policy-{{ROLES[z].POLICIES[y].NAME|lower}}"
+        PolicyDocument: {{ROLES[z].POLICIES[y].DOCUMENT | to_json}}
+{% endfor %}
+      ManagedPolicyArns: {{ROLES[z].MANAGEMENT_POLICIES | to_yaml}}
+
+{% endfor %}
+{% for z in range(0,INSTANCE_PROFILES|length) %}
+  InstanceProfile{{INSTANCE_PROFILES[z].NAME}}:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      InstanceProfileName: !Sub ${Prefix}-${ClusterName}-instanceprofile-{{INSTANCE_PROFILES[z].NAME|lower}}
+      Roles:
+        - Ref: Role{{INSTANCE_PROFILES[z].ROLENAME}}
+{% endfor %}
+
+{% for z in range(0,SECURITYGROUPS|length) %}
+  SecurityGroup{{SECURITYGROUPS[z].NAME}}:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "{{SECURITYGROUPS[z].DESCRIPTION}}"
+      GroupName: !Sub ${Prefix}-${ClusterName}-sg-{{SECURITYGROUPS[z].NAME|lower}}
+      VpcId: 
+        Ref: VPC
+{% if SECURITYGROUPS[z].INGRESS is defined %}
+      SecurityGroupIngress: 
+{% for y in range(0,SECURITYGROUPS[z].INGRESS|length) %}
+      - IpProtocol: "{{SECURITYGROUPS[z].INGRESS[y].PROTOCOL}}"
+        FromPort: "{{SECURITYGROUPS[z].INGRESS[y].FROM}}"
+        ToPort: "{{SECURITYGROUPS[z].INGRESS[y].TO}}"
+        CidrIp: "{{SECURITYGROUPS[z].INGRESS[y].CIDRIP}}"
+{% endfor %}
+{% endif %}
+
+{% endfor %}
+Outputs:
+{% for z in range(0,ROLES|length) %}
+{% if ROLES[z].OUTPUT is not defined or ROLES[z].OUTPUT %}
+  Role{{ROLES[z].NAME}}:
+    Value: !GetAtt "Role{{ROLES[z].NAME}}.Arn"
+    Export:
+      Name: !Sub "${ClusterName}-Role{{ROLES[z].NAME}}-Arn"
+{% endif %}
+{% endfor %}
+{% for z in range(0,INSTANCE_PROFILES|length) %}
+{% if INSTANCE_PROFILES[z].OUTPUT is not defined or INSTANCE_PROFILES[z].OUTPUT%}
+  InstanceProfile{{INSTANCE_PROFILES[z].NAME}}:
+    Value: !GetAtt "InstanceProfile{{INSTANCE_PROFILES[z].NAME}}.Arn"
+    Export:
+      Name: !Sub "${ClusterName}-InstanceProfile{{INSTANCE_PROFILES[z].NAME}}-Arn"
+{% endif %}
+{% endfor %}
+{% for z in range(0,SECURITYGROUPS|length) %}
+{% if SECURITYGROUPS[z].OUTPUT is not defined or SECURITYGROUPS[z].OUTPUT%}
+  SecurityGroup{{SECURITYGROUPS[z].NAME}}:
+    Value: !GetAtt "SecurityGroup{{SECURITYGROUPS[z].NAME}}.GroupId"
+    Export:
+      Name: !Sub "${ClusterName}-SecurityGroup{{SECURITYGROUPS[z].NAME}}-GroupId"
+{% endif %}
+{% endfor %}

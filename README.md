@@ -1,32 +1,89 @@
-Role Name
+ASBRL-IAM
 =========
 
-A brief description of the role goes here.
+Create a CloudFormation Template to Deploy a IAM Stack
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+None
+
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+- TEMPLATE_DEST: (String)
+- TAGS:
+    - RELEASE: (String)
+    - ENVIRONMENT_TYPE: (String)
+- ROLES: (List)
+    - NAME: (String)
+    - OUTPUT: True (Default)
+    - ASSUME_ROLE_PRINCIPAL: (String)
+    - POLICIES: (List)
+    - MANAGEMENT_POLICIES: (List)
+- INSTANCE_PROFILES: (List)
+    - NAME: (String)
+    - OUTPUT: True (Default)
+    - ROLENAME: (String)
+- SECURITYGROUPS: (List)
+    - NAME: (String)
+    - OUTPUT: True (Default)
+    - DESCRIPTION: (String)
+    - INGRESS: (List)
+
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+None
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
-
+        - name: Generate {{EnvironmentType}} cf-parameters
+          include_role:
+            name: asbrl-ssm-parameterstore
+          vars:
+            TEMPLATE_DEST: ./artifacts/{{EnvironmentType}}/cf-rabbitstack-security.yml
+            TAGS:
+              RELEASE: "{{Release}}"
+              ENVIRONMENT_TYPE: "{{EnvironmentType}}"
+            ROLES:
+            - NAME: node
+              OUTPUT: false
+              ASSUME_ROLE_PRINCIPAL: ec2.amazonaws.com
+              POLICIES:
+              - NAME: node
+                DOCUMENT:
+                  Version: "2012-10-17"
+                  Statement:
+                  - Effect: "Allow"
+                    Action: 
+                      - "ec2:DescribeInstances"
+                    Resource: "*"
+              MANAGEMENT_POLICIES:
+              - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+            INSTANCE_PROFILES:
+            - NAME: node
+              ROLENAME: node
+            SECURITYGROUPS:
+            - NAME: ec2internal
+              DESCRIPTION: Security Group for internal communication between nodes. SHOULD NOT BE MODIFIED
+              INGRESS: 
+              - PROTOCOL: tcp
+                FROM: 4369
+                TO: 35682
+                CIDRIP: 10.0.0.0/8
+              - PROTOCOL: tcp
+                FROM: 4369
+                TO: 35682
+                CIDRIP: 172.16.0.0/12
+              - PROTOCOL: tcp
+                FROM: 4369
+                TO: 35682
+                CIDRIP: 192.168.0.0/16
+            
 License
 -------
 
@@ -35,4 +92,4 @@ BSD
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+Moegui.com
