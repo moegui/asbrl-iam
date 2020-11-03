@@ -68,12 +68,12 @@ Resources:
         ToPort: "{{SECURITYGROUPS[z].INGRESS[y].TO}}"
         CidrIp: "{{SECURITYGROUPS[z].INGRESS[y].CIDRIP}}"
 {% endfor %}
-      Tags: 
-        ClusterName: !Ref ClusterName
-        Release: {{TAGS.RELEASE}}
-        Environment: {{TAGS.ENVIRONMENT_TYPE}}
 {% endif %}
-
+      Tags: 
+          ClusterName: !Ref ClusterName
+          Release: {{TAGS.RELEASE}}
+          Environment: {{TAGS.ENVIRONMENT_TYPE}}
+          
 {% endfor %}
 
 Outputs:
