@@ -31,8 +31,13 @@ Resources:
         PolicyDocument: {{ROLES[z].POLICIES[y].DOCUMENT | to_json}}
 {% endfor %}
       ManagedPolicyArns: {{ROLES[z].MANAGEMENT_POLICIES | to_yaml}}
+      Tags: 
+        ClusterName: !Ref ClusterName
+        Release: {{TAGS.RELEASE}}
+        Environment: {{TAGS.ENVIRONMENT_TYPE}}
 
 {% endfor %}
+
 {% for z in range(0,INSTANCE_PROFILES|length) %}
   InstanceProfile{{INSTANCE_PROFILES[z].NAME}}:
     Type: "AWS::IAM::InstanceProfile"
@@ -40,6 +45,11 @@ Resources:
       InstanceProfileName: !Sub ${Prefix}-${ClusterName}-instanceprofile-{{INSTANCE_PROFILES[z].NAME|lower}}
       Roles:
         - Ref: Role{{INSTANCE_PROFILES[z].ROLENAME}}
+      Tags: 
+          ClusterName: !Ref ClusterName
+          Release: {{TAGS.RELEASE}}
+          Environment: {{TAGS.ENVIRONMENT_TYPE}}
+
 {% endfor %}
 
 {% for z in range(0,SECURITYGROUPS|length) %}
@@ -58,9 +68,14 @@ Resources:
         ToPort: "{{SECURITYGROUPS[z].INGRESS[y].TO}}"
         CidrIp: "{{SECURITYGROUPS[z].INGRESS[y].CIDRIP}}"
 {% endfor %}
+      Tags: 
+        ClusterName: !Ref ClusterName
+        Release: {{TAGS.RELEASE}}
+        Environment: {{TAGS.ENVIRONMENT_TYPE}}
 {% endif %}
 
 {% endfor %}
+
 Outputs:
 {% for z in range(0,ROLES|length) %}
 {% if ROLES[z].OUTPUT is not defined or ROLES[z].OUTPUT %}
