@@ -30,7 +30,9 @@ Resources:
       - PolicyName: !Sub "${Prefix}-${ClusterName}-policy-{{ROLES[z].POLICIES[y].NAME|lower}}"
         PolicyDocument: {{ROLES[z].POLICIES[y].DOCUMENT | to_json}}
 {% endfor %}
+{% if ROLES[z].MANAGEMENT_POLICIES is defined %}
       ManagedPolicyArns: {{ROLES[z].MANAGEMENT_POLICIES | to_yaml}}
+{% endif %}
       Tags: 
         - Key: ClusterName  
           Value: !Ref ClusterName
